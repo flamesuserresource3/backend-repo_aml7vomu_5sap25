@@ -1,48 +1,53 @@
-"""
-Database Schemas
+from datetime import datetime
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, Literal
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
 
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
-"""
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
 
-from pydantic import BaseModel, Field
-from typing import Optional
 
-# Example schemas (replace with your own):
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
-class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+class UserOut(BaseModel):
+    id: str
+    email: EmailStr
+    is_admin: bool = False
+    balance: float = 0.0
 
-# Add your own schemas here:
-# --------------------------------------------------
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class DepositCreate(BaseModel):
+    amount: float = Field(gt=0)
+
+
+class DepositOut(BaseModel):
+    id: str
+    user_id: str
+    amount: float
+    status: Literal["pending", "approved", "rejected"]
+    created_at: datetime
+    receipt_data_url: Optional[str] = None
+
+
+class CoinFlipBet(BaseModel):
+    amount: float = Field(gt=0)
+    choice: Literal["heads", "tails"]
+
+
+class ColorBet(BaseModel):
+    amount: float = Field(gt=0)
+    color: Literal["red", "green", "blue"]
+
+
+class AviatorBet(BaseModel):
+    amount: float = Field(gt=0)
+    cashout_multiplier: float = Field(gt=1.0)
+
+
+class MinesBet(BaseModel):
+    amount: float = Field(gt=0)
+    mines: int = Field(ge=1, le=24)
